@@ -1,24 +1,21 @@
-% =================================================================================================
-% Prepare the data for parallel coordinates plot (internal function).
-% =================================================================================================
+function data_parsed = get_parse(data_raw, ctrl)
+% Prepare the data for parallel coordinates plot.
 %
-% See also:
-%     - run_parse (function calling by this function)
+%    Filter and sort the provided dataset.
+%    Find the color of the lines.
+%    Select the lines to highlight.
+%    Find the variables name, scaling, ranges
 %
-% =================================================================================================
-% Thomas Guillod <guillod@lem.ee.ethz.ch>
-% PES ETHZ
-% =================================================================================================
-
-function data_parsed = get_parse(name, data_raw, ctrl)
-% main function
-%     - name - name of the dataset
-%     - data_raw - raw data
-%     - ctrl - struct with data used to parse the provided data
-%     - data_parsed - parsed data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-fprintf('============================== %s ==============================\n', name)
+%    If many lines exist, the generated plot is potentially huge.
+%
+%    Parameters:
+%        data_raw (struct): struct with the provided dataset
+%        ctrl (struct): struct with plot parameters
+%
+%    Returns:
+%        data_parsed (struct): struct with the data to be plotted
+%
+%    (c) 2019-2020, ETH Zurich, Power Electronic Systems Laboratory, T. Guillod
 
 % load the data
 res = data_raw.res;
@@ -27,16 +24,16 @@ n_sol = data_raw.n_sol;
 % filter and sort
 [res, n_sol] = filter_sort(res, n_sol, ctrl.filter, ctrl.sort);
 
-% color scale
+% get the color scale
 color = get_color(res, n_sol, ctrl.color);
 
-% highlight
+% find the curves to highlight
 highlight = get_highlight(res, n_sol, ctrl.highlight);
 
 % parsed the variable
 var = get_var(res, n_sol, ctrl.var);
 
-% disp the parsed data
+% display the parsed data
 disp_data_parsed(color, highlight, var)
 
 % assign the data
@@ -44,19 +41,20 @@ data_parsed.color = color;
 data_parsed.highlight = highlight;
 data_parsed.var = var;
 
-fprintf('============================== %s ==============================\n', name)
-
 end
 
 function [res_sort, n_sol_sort] = filter_sort(res_raw, n_sol_raw, filter, sort)
-% filter and sort the data
-%     - res_raw - input designs
-%     - n_sol_raw - number of input designs
-%     - filter - filtering rule
-%     - sort - sorting rule
-%     - res_sort - sorted and filtered designs
-%     - n_sol_sort - number of sorted and filtered designs
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Filter and sort the dataset.
+%
+%    Parameters:
+%        res_raw (struct): input dataset
+%        n_sol_raw (integer): number of data in the dataset
+%        filter(struct): filtering rule
+%        sort(struct): sorting rule
+%
+%    Returns:
+%        res_sort (struct): sorted and filtered dataset
+%        n_sol_sort (integer): number of sorted and filtered data in the dataset
 
 % filter
 idx = filter(res_raw, n_sol_raw);
@@ -68,7 +66,7 @@ idx = sort(res_filter, n_sol_filter);
 n_sol_sort = nnz(idx);
 res_sort = get_filter(res_filter, idx);
 
-% display the number of designs
+% display the number of data
 fprintf('n_sol\n')
 fprintf('    n_sol_raw = %d\n', n_sol_raw)
 fprintf('    n_sol_filter = %d\n', n_sol_filter)
@@ -77,12 +75,15 @@ fprintf('    n_sol_sort = %d\n', n_sol_sort)
 end
 
 function color_parsed = get_color(res, n_sol, color)
-% get the color scale data
-%     - res - designs
-%     - n_sol - number of designs
-%     - color - coloring rule
-%     - color_parsed - color scale data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Get the color scale data.
+%
+%    Parameters:
+%        res (struct): dataset
+%        n_sol (integer): number of data in the dataset
+%        color (struct): coloring rule
+%
+%    Returns:
+%        color_parsed (struct) - parsed color scale data
 
 % get the color vector
 color_vec = color.fct(res, n_sol);
@@ -97,14 +98,17 @@ color_parsed = struct(...
 end
 
 function highlight_parsed = get_highlight(res, n_sol, highlight)
-% get the highlighted designs
-%     - res - designs
-%     - n_sol - number of designs
-%     - highlight - highlighting rule
-%     - highlight_parsed - highlighted designs data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Get the highlighted lines.
+%
+%    Parameters:
+%        res (struct): dataset
+%        n_sol (integer): number of data in the dataset
+%        highlight (struct): highlighting rule
+%
+%    Returns:
+%        highlight_parsed (struct): parsed highlighted lines data
 
-% get the indices of the designs
+% get the indices of the lines to highlight
 for i=1:length(highlight)
     highlight_tmp = highlight{i};
     idx = highlight_tmp.fct(res, n_sol);
@@ -125,12 +129,15 @@ highlight_parsed = struct(...
 end
 
 function var_parsed = get_var(res, n_sol, var)
-% parse and scale the variables
-%     - res - designs
-%     - n_sol - number of designs
-%     - var - var scaling and naming rules
-%     - var_parsed - parsed variables data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parse and scale the variables.
+%
+%    Parameters:
+%        res (struct): dataset
+%        n_sol (integer): number of data in the dataset
+%        var (struct): var scaling and naming rules
+%
+%    Returns:
+%        var_parsed (struct): parsed variables data
 
 % get the scaling of the variables
 for i=1:length(var)
@@ -161,18 +168,19 @@ var_parsed = struct(...
 end
 
 function disp_data_parsed(color, highlight, var)
-% display the parsed data
-%     - color - color scale data
-%     - highlight - highlighted designs data
-%     - var_parsed - parsed variables data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Display the parsed data.
+%
+%    Parameters:
+%        color (struct) - parsed color scale data
+%        highlight (struct): parsed highlighted lines data
+%        var (struct): parsed variables data
 
 % color scale
 fprintf('color\n')
 fprintf('    %s\n', color.name)
-fprintf('    range = [%f, %f]\n', min(color.range), max(color.range))
+fprintf('    range = [%.3f, %.3f]\n', min(color.range), max(color.range))
 
-% highlighted designs
+% highlighted lines
 fprintf('highlight\n')
 fprintf('    n_highlight = %d\n', highlight.n_highlight)
 fprintf('    highlight\n')
@@ -196,24 +204,27 @@ for i=1:var.n_var
     % range and min/max
     fprintf('        %s\n', var.name_vec{i})
     fprintf('            color = %s\n', color)
-    fprintf('            range = [%f, %f]\n', range_min, range_max)
-    fprintf('            min_max = [%f, %f]\n', min(vec), max(vec))
+    fprintf('            range = [%.3f, %.3f]\n', range_min, range_max)
+    fprintf('            min_max = [%.3f, %.3f]\n', min(vec), max(vec))
     
-    % highlighted designs values
+    % highlighted line values
     fprintf('            highlight\n')
     for j=1:highlight.n_highlight
-        fprintf('                %s = %f\n', highlight.name_vec{j}, vec(highlight.idx_vec(j)))
+        fprintf('                %s = %.3f\n', highlight.name_vec{j}, vec(highlight.idx_vec(j)))
     end
 end
 
 end
 
 function res_filter = get_filter(res, idx)
-% filter and reorder the designs
-%     - res - input designs
-%     - idx - filter or permutation vector
-%     - res_filter - output designs
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Filter and reorder a dataset (struct of arrays).
+%
+%    Parameters:
+%        res (struct): input data
+%        idx (vector): filter or permutation vector
+%
+%    Returns:
+%        res_filter (struct): output data
 
 field = fieldnames(res);
 for i=1:length(field)
@@ -223,11 +234,14 @@ end
 end
 
 function vec_scale = get_scale(vec_original, range)
-% normalize a vector with respect to bounds
-%     - vec_original - input vector
-%     - range - vector with the bounds
-%     - vec_scale - scaled vector
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Normalize a vector with respect to bounds.
+%
+%    Parameters:
+%        vec_original (vector): input vector
+%        range (vector): vector with the bounds
+%
+%    Returns:
+%        vec_scale (vector): scaled vector
 
 vec_scale = (vec_original-min(range))./(max(range)-min(range));
 

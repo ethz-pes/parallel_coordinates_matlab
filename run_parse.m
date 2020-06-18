@@ -32,14 +32,13 @@ addpath('utils')
 ctrl = get_ctrl();
 
 % load the data
-data_tmp = load('data/data_raw.mat');
-data_raw = data_tmp.data_raw;
+data_raw = load('data/data_raw.mat');
 
 % parse the struct
-data_parsed = get_parse('test', data_raw, ctrl);
+data_parsed = get_parse(data_raw, ctrl);
 
 % save the data
-save('data/data_parsed.mat', 'data_parsed');
+save('data/data_parsed.mat', '-struct', 'data_parsed');
 
 end
 
