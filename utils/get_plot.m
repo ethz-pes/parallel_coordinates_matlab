@@ -1,9 +1,13 @@
 function fig = get_plot(data_parsed, ctrl, type)
 % Make a parallel coordinates plot.
 %
-%    Make a parallel coordinate plot from parsed data.
+%    Plot the axis and background color.
+%    Plot the colored lines.
+%    Plot the highlighted lines.
+%    Plot the variable ranges.
 %
 %    If many lines exist, the generated plot is potentially huge.
+%    Therefore, for large datasets, the axis and the lines are split in two plots.
 %
 %    Three different types of plots are possible
 %        - 'all_vector' - vector plot - plot everything (potentially huge)
