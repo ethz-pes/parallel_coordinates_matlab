@@ -14,7 +14,7 @@ The tool is able to handle large amount of data:
 * For large datasets, a single vector plot is generated
 * For large datasets, a vector plot is generated with the axis and a raster plot with the data
 
-## Examples
+## Example
 
 In the example, the design space diversity of a medium-frequency transformer is considered:
 * [run_parse.m](run_parse.m) - Extract and parse the dataset
