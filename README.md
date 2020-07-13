@@ -14,6 +14,8 @@ The tool is able to handle large amount of data:
 * For large datasets, a single vector plot is generated
 * For large datasets, a vector plot is generated with the axis and a raster plot with the data
 
+This tool is developed by the **Power Electronic Systems Laboratory at ETH Zurich** and is available under the **BSD License**. The code is also available on the ETH Data Archive.
+
 ## Example
 
 In the example, the design space diversity of a medium-frequency transformer is considered:
