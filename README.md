@@ -1,10 +1,10 @@
 # Parallel Coordinates Plot with MATLAB
 
-This **MATLAB** tool makes **parallel coordinates plots**.
+This **MATLAB** tool makes **parallel coordinates plots** with **paper quality**.
 Parallel coordinates plots allows the **visualization of high-dimensional data**.
 
 The following features are implemented: 
-* Filering and sorting of the variables
+* Filtering and sorting of the variables
 * Scaling of the range of the variables
 * Find the color of the lines composing the plot
 * Extract and highlight special lines
