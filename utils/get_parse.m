@@ -30,6 +30,7 @@ color_axis = ctrl.color_axis;
 
 % filter and sort
 [res, n_sol] = filter_sort(res, n_sol, filter, sort);
+assert(n_sol>0, 'invalid data')
 
 % get the color scale
 color = get_color(res, n_sol, color_axis);
@@ -39,6 +40,7 @@ highlight = get_highlight(res, n_sol, highlight_idx);
 
 % parsed the variable
 var = get_var(res, n_sol, var_axis);
+assert(length(var_axis)>1, 'invalid data')
 
 % display the parsed data
 disp_data_parsed(highlight, var)
@@ -137,7 +139,7 @@ for i=1:length(highlight_idx)
     fct = highlight_tmp.fct;
     name = highlight_tmp.name;
     color = highlight_tmp.color;
-        
+    
     idx_vec(i) = fct(res, n_sol);
     color_vec{i} = color;
     name_vec{i} = name;
@@ -206,11 +208,13 @@ function disp_data_parsed(highlight, var)
 %        var (struct): parsed variables data
 
 % highlighted lines
-fprintf('highlight\n')
-fprintf('    n_highlight = %d\n', highlight.n_highlight)
-fprintf('    highlight\n')
-for i=1:highlight.n_highlight
-    fprintf('        %s = %s / %d\n', highlight.name_vec{i}, highlight.color_vec{i}, highlight.idx_vec(i))
+if highlight.n_highlight>0
+    fprintf('highlight\n')
+    fprintf('    n_highlight = %d\n', highlight.n_highlight)
+    fprintf('    highlight\n')
+    for i=1:highlight.n_highlight
+        fprintf('        %s = %s / %d\n', highlight.name_vec{i}, highlight.color_vec{i}, highlight.idx_vec(i))
+    end
 end
 
 % variable number
@@ -233,9 +237,11 @@ for i=1:var.n_var
     fprintf('            min_max = [%.3f, %.3f]\n', min(vec), max(vec))
     
     % highlighted line values
-    fprintf('            highlight\n')
-    for j=1:highlight.n_highlight
-        fprintf('                %s = %.3f\n', highlight.name_vec{j}, vec(highlight.idx_vec(j)))
+    if highlight.n_highlight>0
+        fprintf('            highlight\n')
+        for j=1:highlight.n_highlight
+            fprintf('                %s = %.3f\n', highlight.name_vec{j}, vec(highlight.idx_vec(j)))
+        end
     end
 end
 

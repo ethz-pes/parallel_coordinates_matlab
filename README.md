@@ -46,3 +46,4 @@ The tool is tested with the following MATLAB setup:
 
 * This project is licensed under the **BSD License**, see [LICENSE.md](LICENSE.md).
 * This project is copyrighted by: (c) 2016-2020, ETH Zurich, Power Electronic Systems Laboratory, T. Guillod.
+* This project is copyrighted by: (c) 2021-2022, T. Guillod.
