@@ -21,20 +21,27 @@ function data_parsed = get_parse(data_raw, ctrl)
 res = data_raw.res;
 n_sol = data_raw.n_sol;
 
+% extract
+filter = ctrl.filter;
+sort = ctrl.sort;
+highlight_idx = ctrl.highlight_idx;
+var_axis = ctrl.var_axis;
+color_axis = ctrl.color_axis;
+
 % filter and sort
-[res, n_sol] = filter_sort(res, n_sol, ctrl.filter, ctrl.sort);
+[res, n_sol] = filter_sort(res, n_sol, filter, sort);
 
 % get the color scale
-color = get_color(res, n_sol, ctrl.color);
+color = get_color(res, n_sol, color_axis);
 
 % find the curves to highlight
-highlight = get_highlight(res, n_sol, ctrl.highlight);
+highlight = get_highlight(res, n_sol, highlight_idx);
 
 % parsed the variable
-var = get_var(res, n_sol, ctrl.var);
+var = get_var(res, n_sol, var_axis);
 
 % display the parsed data
-disp_data_parsed(color, highlight, var)
+disp_data_parsed(highlight, var)
 
 % assign the data
 data_parsed.color = color;
@@ -74,7 +81,7 @@ fprintf('    n_sol_sort = %d\n', n_sol_sort)
 
 end
 
-function color_parsed = get_color(res, n_sol, color)
+function color = get_color(res, n_sol, color_axis)
 % Get the color scale data.
 %
 %    Parameters:
@@ -85,19 +92,32 @@ function color_parsed = get_color(res, n_sol, color)
 %    Returns:
 %        color_parsed (struct) - parsed color scale data
 
+% extract
+fct  = color_axis.fct;
+name  = color_axis.name;
+range  = color_axis.range;
+scale  = color_axis.scale;
+
 % get the color vector
-color_vec = color.fct(res, n_sol);
+vec = fct(res, n_sol);
+
+% scale the colormap
+vec = get_scale(vec, range, scale);
+
+% position of the ticks
+tick = get_scale(range, range, scale);
 
 % assign the data
-color_parsed = struct(...
-    'vec', color_vec, ...
-    'name', color.name,...
-    'range', color.range...
+color = struct(...
+    'vec', vec, ...
+    'tick', tick,...
+    'range', range,...
+    'name', name...
     );
 
 end
 
-function highlight_parsed = get_highlight(res, n_sol, highlight)
+function highlight = get_highlight(res, n_sol, highlight_idx)
 % Get the highlighted lines.
 %
 %    Parameters:
@@ -109,18 +129,20 @@ function highlight_parsed = get_highlight(res, n_sol, highlight)
 %        highlight_parsed (struct): parsed highlighted lines data
 
 % get the indices of the lines to highlight
-for i=1:length(highlight)
-    highlight_tmp = highlight{i};
-    idx = highlight_tmp.fct(res, n_sol);
-    
-    idx_vec(i) = idx;
-    color_vec{i} = highlight_tmp.color;
-    name_vec{i} = highlight_tmp.name;
+for i=1:length(highlight_idx)
+    highlight_tmp = highlight_idx{i};
+    fct = highlight_tmp.fct;
+    name = highlight_tmp.name;
+    color = highlight_tmp.color;
+        
+    idx_vec(i) = fct(res, n_sol);
+    color_vec{i} = color;
+    name_vec{i} = name;
 end
 
 % assign the data
-highlight_parsed = struct(...
-    'n_highlight', length(highlight),...
+highlight = struct(...
+    'n_highlight', length(highlight_idx),...
     'idx_vec', {idx_vec},...
     'color_vec', {color_vec},...
     'name_vec', {name_vec}...
@@ -128,7 +150,7 @@ highlight_parsed = struct(...
 
 end
 
-function var_parsed = get_var(res, n_sol, var)
+function var = get_var(res, n_sol, var_axis)
 % Parse and scale the variables.
 %
 %    Parameters:
@@ -140,22 +162,28 @@ function var_parsed = get_var(res, n_sol, var)
 %        var_parsed (struct): parsed variables data
 
 % get the scaling of the variables
-for i=1:length(var)
-    var_tmp = var{i};
-    vec = var_tmp.fct(res, n_sol);
-    vec_scale = get_scale(vec, var_tmp.range);
-
-    scale_mat(i,:) = vec_scale;
+for i=1:length(var_axis)
+    var_tmp = var_axis{i};
+    fct = var_tmp.fct;
+    name = var_tmp.name;
+    color = var_tmp.color;
+    range = var_tmp.range;
+    scale = var_tmp.scale;
+    
+    vec = fct(res, n_sol);
+    vec_scale = get_scale(vec, range, scale);
+    
     raw_mat(i,:) = vec;
-    name_vec{i} = var_tmp.name;
-    color_vec{i} = var_tmp.color;
-    range_min_vec(i) = min(var_tmp.range);
-    range_max_vec(i) = max(var_tmp.range);
+    scale_mat(i,:) = vec_scale;
+    name_vec{i} = name;
+    color_vec{i} = color;
+    range_min_vec(i) = min(range);
+    range_max_vec(i) = max(range);
 end
 
 % assign the data
-var_parsed = struct(...
-    'n_var', length(var),...
+var = struct(...
+    'n_var', length(var_axis),...
     'n_sol', n_sol,...
     'scale_mat', {scale_mat},...
     'raw_mat', {raw_mat},...
@@ -163,29 +191,23 @@ var_parsed = struct(...
     'range_min_vec', {range_min_vec},...
     'range_max_vec', {range_max_vec},...
     'color_vec', {color_vec}...
-);
+    );
 
 end
 
-function disp_data_parsed(color, highlight, var)
+function disp_data_parsed(highlight, var)
 % Display the parsed data.
 %
 %    Parameters:
-%        color (struct) - parsed color scale data
 %        highlight (struct): parsed highlighted lines data
 %        var (struct): parsed variables data
-
-% color scale
-fprintf('color\n')
-fprintf('    %s\n', color.name)
-fprintf('    range = [%.3f, %.3f]\n', min(color.range), max(color.range))
 
 % highlighted lines
 fprintf('highlight\n')
 fprintf('    n_highlight = %d\n', highlight.n_highlight)
 fprintf('    highlight\n')
 for i=1:highlight.n_highlight
-    fprintf('        %s = %s\n', highlight.name_vec{i}, highlight.color_vec{i})
+    fprintf('        %s = %s / %d\n', highlight.name_vec{i}, highlight.color_vec{i}, highlight.idx_vec(i))
 end
 
 % variable number
@@ -233,16 +255,22 @@ end
 
 end
 
-function vec_scale = get_scale(vec_original, range)
+function vec_scale = get_scale(vec_original, range, scale)
 % Normalize a vector with respect to bounds.
 %
 %    Parameters:
 %        vec_original (vector): input vector
 %        range (vector): vector with the bounds
+%        range (string): scaling type
 %
 %    Returns:
 %        vec_scale (vector): scaled vector
 
-vec_scale = (vec_original-min(range))./(max(range)-min(range));
+switch scale
+    case 'lin'
+        vec_scale = (vec_original-min(range))./(max(range)-min(range));
+    case 'log'
+        vec_scale = (log10(vec_original)-log10(min(range)))./(log10(max(range))-log10(min(range)));
+end
 
 end

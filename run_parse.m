@@ -38,36 +38,38 @@ ctrl.sort = @(res, n_sol) randperm(n_sol);
 %    - name: name of the variable
 %    - fct: function handle returning the variable data (vector)
 %    - range: range of the variable (axis limits)
+%    - scale: variable scaling ('lin' or 'log')
 %    - color: background color for this variable
-ctrl.var = {};
-ctrl.var{end+1} = struct('name', 'f [kHz]', 'fct', @(res, n_sol) 1e-3.*res.f, 'range', [0 350], 'color', 'g');
-ctrl.var{end+1} = struct('name', 'n [#]', 'fct', @(res, n_sol) res.n, 'range', [0 16], 'color', 'g');
-ctrl.var{end+1} = struct('name', 'f_cw [#]', 'fct', @(res, n_sol) res.fact_core_window, 'range', [0 8], 'color', 'g');
-ctrl.var{end+1} = struct('name', 'f_c [#]', 'fct', @(res, n_sol) res.fact_core, 'range', [0 8], 'color', 'g');
-ctrl.var{end+1} = struct('name', 'f_w [#]', 'fct', @(res, n_sol) res.fact_window, 'range', [0 11], 'color', 'g');
-ctrl.var{end+1} = struct('name', 'r_w [#]', 'fct', @(res, n_sol) res.fact_freq_winding, 'range', [0 5], 'color', 'y');
-ctrl.var{end+1} = struct('name', 'r_cw [#]', 'fct', @(res, n_sol) res.fact_core_winding, 'range', [0 3], 'color', 'y');
-ctrl.var{end+1} = struct('name', 'J [A/mm2]', 'fct', @(res, n_sol) 1e-6.*res.J_rms_winding, 'range', [0 7], 'color', 'y');
-ctrl.var{end+1} = struct('name', 'B [mT]', 'fct', @(res, n_sol) 1e3.*res.B_peak_core, 'range', [0 180], 'color', 'y');
-ctrl.var{end+1} = struct('name', 'dT [degC]', 'fct', @(res, n_sol) res.delta_T, 'range', [0 100], 'color', 'y');
-ctrl.var{end+1} = struct('name', 'eta [%]', 'fct', @(res, n_sol) 1e2.*res.eta, 'range', [99.5 100.0], 'color', 'r');
+ctrl.var_axis = {};
+ctrl.var_axis{end+1} = struct('name', 'f [kHz]', 'fct', @(res, n_sol) 1e-3.*res.f, 'range', [0 350], 'scale', 'lin', 'color', 'g');
+ctrl.var_axis{end+1} = struct('name', 'n [#]', 'fct', @(res, n_sol) res.n, 'range', [0 16], 'scale', 'lin', 'color', 'g');
+ctrl.var_axis{end+1} = struct('name', 'f_cw [#]', 'fct', @(res, n_sol) res.fact_core_window, 'range', [0 8], 'scale', 'lin', 'color', 'g');
+ctrl.var_axis{end+1} = struct('name', 'f_c [#]', 'fct', @(res, n_sol) res.fact_core, 'range', [0 8], 'scale', 'lin', 'color', 'g');
+ctrl.var_axis{end+1} = struct('name', 'f_w [#]', 'fct', @(res, n_sol) res.fact_window, 'range', [0 11], 'scale', 'lin', 'color', 'g');
+ctrl.var_axis{end+1} = struct('name', 'r_w [#]', 'fct', @(res, n_sol) res.fact_freq_winding, 'range', [0 5], 'scale', 'lin', 'color', 'y');
+ctrl.var_axis{end+1} = struct('name', 'r_cw [#]', 'fct', @(res, n_sol) res.fact_core_winding, 'range', [0 3], 'scale', 'lin', 'color', 'y');
+ctrl.var_axis{end+1} = struct('name', 'J [A/mm2]', 'fct', @(res, n_sol) 1e-6.*res.J_rms_winding, 'range', [0 7], 'scale', 'lin', 'color', 'y');
+ctrl.var_axis{end+1} = struct('name', 'B [mT]', 'fct', @(res, n_sol) 1e3.*res.B_peak_core, 'range', [0 180], 'scale', 'lin', 'color', 'y');
+ctrl.var_axis{end+1} = struct('name', 'dT [degC]', 'fct', @(res, n_sol) res.delta_T, 'range', [0 100], 'scale', 'lin', 'color', 'y');
+ctrl.var_axis{end+1} = struct('name', 'eta [%]', 'fct', @(res, n_sol) 1e2.*res.eta, 'range', [99.5 100.0], 'scale', 'lin', 'color', 'r');
 
 % describe the color scale 
 %    - color: struct with the color scale data
 %    - name: name of the color axis
 %    - fct: function handle returning the color value (vector)
 %    - range: range of the color scale (axis limits and ticks)
-ctrl.color = struct('name', 'f [kHz]', 'fct', @(res, n_sol) 1e-3.*res.f, 'range', 0:50:350);
+%    - scale: colormap scaling ('lin' or 'log')
+ctrl.color_axis = struct('name', 'f [kHz]', 'fct', @(res, n_sol) 1e-3.*res.f, 'range', 0:50:350, 'scale', 'lin');
 
 % describe the highlighted designs 
 %    - var: cell array with the highlighted designs
 %    - name: name of the design
 %    - fct: function handle returning the index of the selected design
 %    - color: color of the curve for the design
-ctrl.highlight = {};
-ctrl.highlight{end+1} = struct('name', 'best', 'fct', @(res, n_sol) get_idx_max(res.eta), 'color', 'r');
-ctrl.highlight{end+1} = struct('name', 'min', 'fct', @(res, n_sol) get_idx_min(res.f), 'color', 'r');
-ctrl.highlight{end+1} = struct('name', 'max', 'fct', @(res, n_sol) get_idx_max(res.f), 'color', 'r');
+ctrl.highlight_idx = {};
+ctrl.highlight_idx{end+1} = struct('name', 'best', 'fct', @(res, n_sol) get_idx_max(res.eta), 'color', 'r');
+ctrl.highlight_idx{end+1} = struct('name', 'min', 'fct', @(res, n_sol) get_idx_min(res.f), 'color', 'r');
+ctrl.highlight_idx{end+1} = struct('name', 'max', 'fct', @(res, n_sol) get_idx_max(res.f), 'color', 'r');
 
 %% run
 

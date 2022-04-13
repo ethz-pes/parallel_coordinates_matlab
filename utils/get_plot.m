@@ -114,7 +114,7 @@ xticks(1:var.n_var)
 xticklabels({})
 
 % setup the color axis limits
-caxis([min(color.range) max(color.range)]);
+caxis([0 1]);
 
 if plot_axis==true
     % set up colorbar
@@ -138,13 +138,10 @@ if plot_axis==true
     % get the position of the colorbar ticks and label
     y_tick = get_axis_from_fig(delta_colorbar_start-delta_range, delta_bottom, delta_top);
     y_label = get_axis_from_fig(delta_colorbar_start-delta_text, delta_bottom, delta_top);
-    
-    % scale the colorbar range
-    color_scale = (color.range-min(color.range))./(max(color.range)-min(color.range));
-    
+            
     % add the colorbar ticks
     for i=1:length(color.range)
-        pos = color_scale(i).*(var.n_var-1)+1;
+        pos = color.tick(i).*(var.n_var-1)+1;
         plot_text(pos, y_tick, num2str(color.range(i)))
     end
     
