@@ -129,6 +129,9 @@ function highlight = get_highlight(res, n_sol, highlight_idx)
 %        highlight_parsed (struct): parsed highlighted lines data
 
 % get the indices of the lines to highlight
+idx_vec = [];
+color_vec = {};
+name_vec = {};
 for i=1:length(highlight_idx)
     highlight_tmp = highlight_idx{i};
     fct = highlight_tmp.fct;
